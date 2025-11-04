@@ -11,26 +11,44 @@
       font-family: 'Segoe UI', sans-serif;
       background-color: #f2f4f8;
       margin: 0;
-      padding: 20px;
+      padding: 10px;
       color: #333;
     }
+
     .container {
       max-width: 1000px;
       background: #fff;
-      padding: 20px;
+      padding: 15px;
       border-radius: 12px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       margin: 0 auto;
     }
-    h1 {
-      font-size: 1.8em;
-      text-align: center;
-      color: #0077cc;
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
       margin-bottom: 20px;
+      gap: 10px;
     }
+
+    .header img {
+      width: 60px;
+      height: 60px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+
+    h1 {
+      font-size: 1.3em;
+      margin: 0;
+      text-align: center;
+    }
+
     .summary {
       background: #e8f4fc;
-      padding: 12px;
+      padding: 10px;
       border-radius: 8px;
       margin-bottom: 20px;
       font-weight: 600;
@@ -38,27 +56,36 @@
       justify-content: space-between;
       flex-wrap: wrap;
       gap: 10px;
+      text-align: center;
     }
+
     .summary div {
       flex: 1 1 30%;
-      min-width: 150px;
+      min-width: 120px;
     }
+
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-bottom: 20px;
+      margin-bottom: 10px;
+      font-size: 0.95em;
     }
+
     th, td {
-      padding: 10px;
+      padding: 8px;
       text-align: left;
     }
+
     th {
       background-color: #0077cc;
       color: white;
+      font-size: 0.9em;
     }
+
     tr:nth-child(even) {
       background-color: #f9f9f9;
     }
+
     input {
       padding: 6px;
       border: 1px solid #ccc;
@@ -66,7 +93,13 @@
       width: 100%;
       box-sizing: border-box;
       text-align: right;
+      font-size: 0.9em;
     }
+
+    td:first-child input {
+      text-align: left;
+    }
+
     button {
       background-color: #0077cc;
       color: white;
@@ -75,37 +108,73 @@
       border-radius: 6px;
       cursor: pointer;
       font-weight: 600;
-      margin: 5px;
+      margin-top: 10px;
+      width: 100%;
     }
+
     button:hover {
       background-color: #005fa3;
     }
+
     .percent {
       font-weight: bold;
       text-align: center;
     }
+
     .high { color: green; }
     .medium { color: orange; }
     .low { color: red; }
-    .progress-container {
-      background-color: #e0e0e0;
-      border-radius: 10px;
-      overflow: hidden;
-      height: 14px;
-      margin-top: 5px;
-    }
-    .progress-bar {
-      height: 100%;
-      transition: width 0.3s ease;
-    }
+
     canvas {
       margin-top: 30px;
+      width: 100%;
+      height: auto;
+    }
+
+    /* 🔹 Responsividade para telas pequenas */
+    @media (max-width: 600px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+
+      thead {
+        display: none;
+      }
+
+      tr {
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 10px;
+        background: #fafafa;
+      }
+
+      td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 0;
+      }
+
+      td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #0077cc;
+        margin-right: 10px;
+      }
+
+      button {
+        font-size: 1em;
+      }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Painel de Metas - Produtos</h1>
+    <div class="header">
+      <h1>Painel de Metas - Produtos</h1>
+      <img src="logo.png" alt="Logo">
+    </div>
 
     <div class="summary">
       <div>Cota Geral: <span id="cotaGeral">R$ 0,00</span></div>
@@ -120,19 +189,13 @@
           <th>Cota (R$)</th>
           <th>Realizado (R$)</th>
           <th>% Realizado</th>
-          <th>Ações</th>
         </tr>
       </thead>
       <tbody id="produtos"></tbody>
     </table>
 
-    <div style="text-align:center;">
-      <button id="addProduto">➕ Adicionar Produto</button>
-      <button id="salvar">💾 Salvar Dados</button>
-      <button id="limpar">🗑️ Limpar Dados</button>
-    </div>
-
-    <canvas id="graficoMetas" height="120"></canvas>
+    <button id="addProduto">+ Adicionar Produto</button>
+    <canvas id="graficoMetas" height="100"></canvas>
   </div>
 
   <script>
@@ -145,14 +208,11 @@
     const ctx = document.getElementById("graficoMetas").getContext("2d");
     let grafico = new Chart(ctx, {
       type: 'bar',
-      data: {
-        labels: [],
-        datasets: [
-          { label: 'Cota', data: [], backgroundColor: '#0077cc' },
-          { label: 'Realizado', data: [], backgroundColor: '#2ecc71' }
-        ]
-      },
-      options: { scales: { y: { beginAtZero: true } } }
+      data: { labels: [], datasets: [{ label: '% Realizado', data: [], backgroundColor: [], borderRadius: 6 }] },
+      options: {
+        scales: { y: { beginAtZero: true, max: 120, ticks: { callback: v => v + "%" } } },
+        plugins: { legend: { display: false } }
+      }
     });
 
     function formatarBRL(valor) {
@@ -164,102 +224,91 @@
       return parseFloat(valor.replace(/[R$\s.]/g, '').replace(',', '.')) || 0;
     }
 
-    function atualizarResumoEGrafico() {
-      let somaCota = 0, somaRealizado = 0;
-      let labels = [], cotas = [], realizados = [];
+    function salvarLocal() {
+      const dados = [];
+      produtos.querySelectorAll("tr").forEach(linha => {
+        const nome = linha.querySelector(".nome").value;
+        const cota = linha.querySelector(".cota").value;
+        const realizado = linha.querySelector(".realizado").value;
+        dados.push({ nome, cota, realizado });
+      });
+      localStorage.setItem("produtosMetas", JSON.stringify(dados));
+    }
 
-      const linhas = produtos.querySelectorAll("tr");
-      linhas.forEach(linha => {
+    function carregarLocal() {
+      const dados = JSON.parse(localStorage.getItem("produtosMetas") || "[]");
+      dados.forEach(d => adicionarLinha(d.nome, d.cota, d.realizado));
+      if (dados.length === 0) adicionarLinha();
+      calcularPercentuais();
+    }
+
+    function atualizarGrafico(labels, dados) {
+      grafico.data.labels = labels;
+      grafico.data.datasets[0].data = dados;
+      grafico.data.datasets[0].backgroundColor = dados.map(v => 
+        v >= 100 ? "green" : v >= 70 ? "orange" : "red"
+      );
+      grafico.update();
+    }
+
+    function calcularPercentuais() {
+      let somaCota = 0, somaRealizado = 0;
+      let labels = [], dados = [];
+
+      produtos.querySelectorAll("tr").forEach(linha => {
         const nome = linha.querySelector(".nome").value || "Produto";
         const cota = parseBRL(linha.querySelector(".cota").value);
         const realizado = parseBRL(linha.querySelector(".realizado").value);
         const percentCell = linha.querySelector(".percent");
-        const progressBar = linha.querySelector(".progress-bar");
 
-        const percentual = cota > 0 ? (realizado / cota) * 100 : 0;
-        percentCell.textContent = percentual.toFixed(1) + "%";
-
-        let cor = percentual >= 100 ? "green" : percentual >= 70 ? "orange" : "red";
-        percentCell.className = "percent " + (percentual >= 100 ? "high" : percentual >= 70 ? "medium" : "low");
-        progressBar.style.width = Math.min(percentual, 120) + "%";
-        progressBar.style.backgroundColor = cor;
+        let percentual = cota > 0 ? (realizado / cota) * 100 : 0;
 
         somaCota += cota;
         somaRealizado += realizado;
+
+        percentCell.textContent = percentual.toFixed(1) + "%";
+        percentCell.className = "percent " + 
+          (percentual >= 100 ? "high" : percentual >= 70 ? "medium" : "low");
+
         labels.push(nome);
-        cotas.push(cota);
-        realizados.push(realizado);
+        dados.push(percentual.toFixed(1));
       });
 
       const percentualGeralValor = somaCota > 0 ? (somaRealizado / somaCota) * 100 : 0;
+
       cotaGeral.textContent = formatarBRL(somaCota);
       realizadoGeral.textContent = formatarBRL(somaRealizado);
       percentualGeral.textContent = percentualGeralValor.toFixed(1) + "%";
-      percentualGeral.className = percentualGeralValor >= 100 ? "high" : percentualGeralValor >= 70 ? "medium" : "low";
+      percentualGeral.className = percentualGeralValor >= 100 ? "high" :
+                                  percentualGeralValor >= 70 ? "medium" : "low";
 
-      grafico.data.labels = labels;
-      grafico.data.datasets[0].data = cotas;
-      grafico.data.datasets[1].data = realizados;
-      grafico.update();
+      atualizarGrafico(labels, dados);
+      salvarLocal();
     }
 
-    function adicionarLinha(produto = "", cota = "", realizado = "") {
-      const linha = document.createElement("tr");
-      linha.innerHTML = `
-        <td><input type="text" class="nome" value="${produto}" placeholder="Produto"></td>
-        <td><input type="text" class="cota" value="${cota}" placeholder="0,00"></td>
-        <td><input type="text" class="realizado" value="${realizado}" placeholder="0,00"></td>
-        <td>
-          <div class="percent">0%</div>
-          <div class="progress-container">
-            <div class="progress-bar"></div>
-          </div>
-        </td>
-        <td><button class="remover">❌</button></td>
+    function adicionarLinha(nome = "", cota = "", realizado = "") {
+      const novaLinha = document.createElement("tr");
+      novaLinha.innerHTML = `
+        <td data-label="Produto"><input type="text" class="nome" value="${nome}" placeholder="Nome do produto"></td>
+        <td data-label="Cota (R$)"><input type="text" class="cota" value="${cota}" placeholder="0,00"></td>
+        <td data-label="Realizado (R$)"><input type="text" class="realizado" value="${realizado}" placeholder="0,00"></td>
+        <td data-label="% Realizado" class="percent">0%</td>
       `;
-      produtos.appendChild(linha);
-
-      linha.querySelectorAll("input").forEach(input => {
-        input.addEventListener("input", atualizarResumoEGrafico);
-      });
-      linha.querySelector(".remover").addEventListener("click", () => {
-        linha.remove();
-        atualizarResumoEGrafico();
-      });
+      produtos.appendChild(novaLinha);
     }
 
-    addProduto.addEventListener("click", () => adicionarLinha());
-
-    document.getElementById("salvar").addEventListener("click", () => {
-      const lista = [];
-      produtos.querySelectorAll("tr").forEach(linha => {
-        lista.push({
-          nome: linha.querySelector(".nome").value,
-          cota: linha.querySelector(".cota").value,
-          realizado: linha.querySelector(".realizado").value
-        });
-      });
-      localStorage.setItem("metas", JSON.stringify(lista));
-      alert("💾 Dados salvos com sucesso!");
-    });
-
-    document.getElementById("limpar").addEventListener("click", () => {
-      if (confirm("Deseja realmente apagar todos os dados?")) {
-        localStorage.removeItem("metas");
-        produtos.innerHTML = "";
-        atualizarResumoEGrafico();
+    produtos.addEventListener("input", (e) => {
+      if (["cota", "realizado", "nome"].some(cls => e.target.classList.contains(cls))) {
+        calcularPercentuais();
       }
     });
 
-    function carregarDados() {
-      const lista = JSON.parse(localStorage.getItem("metas")) || [];
-      produtos.innerHTML = "";
-      lista.forEach(item => adicionarLinha(item.nome, item.cota, item.realizado));
-      atualizarResumoEGrafico();
-    }
+    addProduto.addEventListener("click", () => {
+      adicionarLinha();
+      salvarLocal();
+    });
 
-    window.addEventListener("load", carregarDados);
+    carregarLocal();
   </script>
 </body>
 </html>
-
