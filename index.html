@@ -1,263 +1,189 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Painel de Metas - Produtos</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #f2f4f8;
-      margin: 0;
-      padding: 20px;
-      color: #333;
-    }
-    .header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 20px;
-    }
-    .header img {
-      width: 60px;
-      height: 60px;
-      border-radius: 8px;
-      object-fit: cover;
-    }
-    .container {
-      max-width: 1000px;
-      background: #fff;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      margin: 0 auto;
-    }
-    h1 {
-      font-size: 1.5em;
-      margin: 0;
-    }
-    .summary {
-      background: #e8f4fc;
-      padding: 12px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      font-weight: 600;
-      display: flex;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-    .summary div {
-      flex: 1 1 30%;
-      min-width: 150px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 20px;
-    }
-    th, td {
-      padding: 10px;
-      text-align: left;
-    }
-    th {
-      background-color: #0077cc;
-      color: white;
-    }
-    tr:nth-child(even) {
-      background-color: #f9f9f9;
-    }
-    input {
-      padding: 6px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      width: 100%;
-      box-sizing: border-box;
-      text-align: right;
-    }
-    button {
-      background-color: #0077cc;
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 600;
-      margin-top: 10px;
-    }
-    button:hover {
-      background-color: #005fa3;
-    }
-    .percent {
-      font-weight: bold;
-      text-align: center;
-    }
-    .high { color: green; }
-    .medium { color: orange; }
-    .low { color: red; }
-    canvas {
-      margin-top: 30px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Cotas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 30px;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #444;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background: #0077cc;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background: #f2f2f2;
+        }
+        input {
+            width: 100%;
+            padding: 6px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background: #0077cc;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #005fa3;
+        }
+        .total {
+            margin-top: 15px;
+            font-weight: bold;
+            font-size: 18px;
+            color: #0077cc;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <h1>Painel de Metas - Produtos</h1>
-      <img src="logo.png" alt="Logo">
-    </div>
+    <h1>Controle de Cotas</h1>
 
-    <div class="summary">
-      <div>Cota Geral: <span id="cotaGeral">R$ 0,00</span></div>
-      <div>Total Realizado: <span id="realizadoGeral">R$ 0,00</span></div>
-      <div>Percentual Geral: <span id="percentualGeral">0%</span></div>
-    </div>
+    <div class="total">Cota Geral: <span id="cotaGeral">R$ 0,00</span></div>
 
-    <table id="tabela">
-      <thead>
-        <tr>
-          <th>Produto</th>
-          <th>Cota (R$)</th>
-          <th>Realizado (R$)</th>
-          <th>% Realizado</th>
-        </tr>
-      </thead>
-      <tbody id="produtos">
-        <tr>
-          <td><input type="text" placeholder="Nome do produto"></td>
-          <td><input type="text" class="cota" placeholder="0,00"></td>
-          <td><input type="text" class="realizado" placeholder="0,00"></td>
-          <td class="percent">0%</td>
-        </tr>
-      </tbody>
+    <table>
+        <thead>
+            <tr>
+                <th>Produto</th>
+                <th>Cota (R$)</th>
+                <th>Realizado (R$)</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody id="produtos"></tbody>
     </table>
 
-    <button id="addProduto">+ Adicionar Produto</button>
+    <div style="margin-top:15px;">
+        <button id="adicionar">➕ Adicionar Produto</button>
+        <button id="salvarDados">💾 Salvar Dados</button>
+        <button id="carregarDados">📂 Carregar Dados</button>
+        <button id="limparDados">🗑️ Limpar Dados</button>
+    </div>
 
-    <canvas id="graficoMetas" height="100"></canvas>
-  </div>
+    <script>
+        const produtos = document.getElementById("produtos");
+        const cotaGeral = document.getElementById("cotaGeral");
 
-  <script>
-    const produtos = document.getElementById("produtos");
-    const addProduto = document.getElementById("addProduto");
-    const cotaGeral = document.getElementById("cotaGeral");
-    const realizadoGeral = document.getElementById("realizadoGeral");
-    const percentualGeral = document.getElementById("percentualGeral");
-
-    const ctx = document.getElementById("graficoMetas").getContext("2d");
-    let grafico = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: [],
-        datasets: [{
-          label: '% Realizado',
-          data: [],
-          backgroundColor: [],
-          borderRadius: 6
-        }]
-      },
-      options: {
-        scales: {
-          y: {
-            beginAtZero: true,
-            max: 120,
-            ticks: { callback: value => value + "%" }
-          }
-        },
-        plugins: {
-          legend: { display: false }
+        // Função para formatar número em BRL
+        function formatBRL(valor) {
+            return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         }
-      }
-    });
 
-    function formatarBRL(valor) {
-      if (isNaN(valor) || valor === "") return "";
-      return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-    }
+        // Converter texto R$ para número
+        function parseBRL(valor) {
+            if (!valor) return 0;
+            return parseFloat(valor.replace(/[^\d,-]/g, '').replace(',', '.')) || 0;
+        }
 
-    function parseBRL(valor) {
-      return parseFloat(valor.replace(/[R$\s.]/g, '').replace(',', '.')) || 0;
-    }
+        // Atualizar total
+        function atualizarTotal() {
+            let total = 0;
+            document.querySelectorAll(".cota").forEach(campo => {
+                total += parseBRL(campo.value);
+            });
+            cotaGeral.textContent = formatBRL(total);
+        }
 
-    function atualizarGrafico(labels, dados) {
-      grafico.data.labels = labels;
-      grafico.data.datasets[0].data = dados;
-      grafico.data.datasets[0].backgroundColor = dados.map(v => 
-        v >= 100 ? "green" : v >= 70 ? "orange" : "red"
-      );
-      grafico.update();
-    }
+        // Adicionar linha
+        document.getElementById("adicionar").addEventListener("click", () => {
+            const linha = document.createElement("tr");
+            linha.innerHTML = `
+                <td><input type="text" placeholder="Produto"></td>
+                <td><input type="text" class="cota" placeholder="0,00"></td>
+                <td><input type="text" class="realizado" placeholder="0,00"></td>
+                <td><button class="remover">❌</button></td>
+            `;
+            produtos.appendChild(linha);
 
-    function calcularPercentuais() {
-      let somaCota = 0;
-      let somaRealizado = 0;
-      let labels = [];
-      let dados = [];
+            // Eventos
+            linha.querySelector(".cota").addEventListener("input", atualizarTotal);
+            linha.querySelector(".remover").addEventListener("click", () => {
+                linha.remove();
+                atualizarTotal();
+            });
+        });
 
-      const linhas = produtos.querySelectorAll("tr");
-      linhas.forEach(linha => {
-        const nome = linha.querySelector("input[type='text']").value || "Produto";
-        const cotaInput = linha.querySelector(".cota");
-        const realizadoInput = linha.querySelector(".realizado");
-        const percentCell = linha.querySelector(".percent");
+        // Salvar localmente
+        document.getElementById("salvarDados").addEventListener("click", () => {
+            const lista = [];
+            produtos.querySelectorAll("tr").forEach(linha => {
+                const nome = linha.querySelector("input[type='text']").value;
+                const cota = linha.querySelector(".cota")?.value || "";
+                const realizado = linha.querySelector(".realizado")?.value || "";
+                lista.push({ nome, cota, realizado });
+            });
 
-        let cota = parseBRL(cotaInput.value);
-        let realizado = parseBRL(realizadoInput.value);
-        let percentual = cota > 0 ? (realizado / cota) * 100 : 0;
+            localStorage.setItem("produtos", JSON.stringify(lista));
+            alert("✅ Dados salvos localmente!");
+        });
 
-        somaCota += cota;
-        somaRealizado += realizado;
+        // Carregar dados salvos
+        document.getElementById("carregarDados").addEventListener("click", () => {
+            carregarDados();
+            alert("📂 Dados carregados!");
+        });
 
-        percentCell.textContent = percentual.toFixed(1) + "%";
-        percentCell.className = "percent " + 
-          (percentual >= 100 ? "high" : percentual >= 70 ? "medium" : "low");
+        // Limpar dados
+        document.getElementById("limparDados").addEventListener("click", () => {
+            if (confirm("Tem certeza que deseja apagar todos os dados?")) {
+                localStorage.removeItem("produtos");
+                produtos.innerHTML = "";
+                atualizarTotal();
+                alert("🗑️ Dados apagados!");
+            }
+        });
 
-        labels.push(nome);
-        dados.push(percentual.toFixed(1));
-      });
+        // Função para carregar produtos
+        function carregarDados() {
+            const lista = JSON.parse(localStorage.getItem("produtos")) || [];
+            produtos.innerHTML = "";
 
-      const percentualGeralValor = somaCota > 0 ? (somaRealizado / somaCota) * 100 : 0;
+            lista.forEach(item => {
+                const linha = document.createElement("tr");
+                linha.innerHTML = `
+                    <td><input type="text" value="${item.nome}" /></td>
+                    <td><input type="text" class="cota" value="${item.cota}" /></td>
+                    <td><input type="text" class="realizado" value="${item.realizado}" /></td>
+                    <td><button class="remover">❌</button></td>
+                `;
+                produtos.appendChild(linha);
 
-      cotaGeral.textContent = formatarBRL(somaCota);
-      realizadoGeral.textContent = formatarBRL(somaRealizado);
-      percentualGeral.textContent = percentualGeralValor.toFixed(1) + "%";
-      percentualGeral.className = percentualGeralValor >= 100 ? "high" :
-                                  percentualGeralValor >= 70 ? "medium" : "low";
+                linha.querySelector(".cota").addEventListener("input", atualizarTotal);
+                linha.querySelector(".remover").addEventListener("click", () => {
+                    linha.remove();
+                    atualizarTotal();
+                });
+            });
 
-      atualizarGrafico(labels, dados);
-    }
+            atualizarTotal();
+        }
 
-    function formatarCampo(input) {
-      let valor = parseBRL(input.value);
-      input.value = formatarBRL(valor);
-    }
-
-    produtos.addEventListener("input", (e) => {
-      if (e.target.classList.contains("cota") || e.target.classList.contains("realizado")) {
-        calcularPercentuais();
-      }
-    });
-
-    produtos.addEventListener("blur", (e) => {
-      if (e.target.classList.contains("cota") || e.target.classList.contains("realizado")) {
-        formatarCampo(e.target);
-      }
-    }, true);
-
-    addProduto.addEventListener("click", () => {
-      const novaLinha = document.createElement("tr");
-      novaLinha.innerHTML = `
-        <td><input type="text" placeholder="Nome do produto"></td>
-        <td><input type="text" class="cota" placeholder="0,00"></td>
-        <td><input type="text" class="realizado" placeholder="0,00"></td>
-        <td class="percent">0%</td>
-      `;
-      produtos.appendChild(novaLinha);
-    });
-
-    calcularPercentuais();
-  </script>
+        // Carregar automaticamente ao abrir
+        window.addEventListener("load", carregarDados);
+    </script>
 </body>
-
 </html>
