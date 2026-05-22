@@ -1,37 +1,108 @@
-const grid = document.getElementById('rifa-grid');
-const totalNumeros = 250;
+const API =
+"rodrigopalmeida.pythonanywhere.com";
 
-// 1. Função para carregar o estado salvo
-const carregarEstado = () => {
-    const salvos = JSON.parse(localStorage.getItem('rifa_selecionados')) || [];
-    return salvos;
-};
+const grid =
+document.getElementById("rifa-grid");
 
-// 2. Função para salvar o estado
-const salvarEstado = () => {
-    const selecionados = [];
-    document.querySelectorAll('.inativo').forEach(el => {
-        selecionados.push(el.innerText);
-    });
-    localStorage.setItem('rifa_selecionados', JSON.stringify(selecionados));
-};
+const total = 250;
 
-const numerosSalvos = carregarEstado();
 
-for (let i = 1; i <= totalNumeros; i++) {
-    const celula = document.createElement('div');
-    celula.classList.add('numero');
-    celula.innerText = i;
+async function carregarBilhetes(){
 
-    // Aplica o estado salvo ao carregar
-    if (numerosSalvos.includes(i.toString())) {
-        celula.classList.add('inativo');
+    const resposta =
+    await fetch(
+        `${API}/api/status`
+    );
+
+    const dados =
+    await resposta.json();
+
+    montarGrid(dados);
+
+}
+
+
+function montarGrid(status){
+
+    grid.innerHTML = "";
+
+    for(let i=1;i<=total;i++){
+
+        const numero =
+        document.createElement("div");
+
+        numero.classList.add("numero");
+
+        numero.innerText=i;
+
+        if(
+            status[i]==="vendido"
+        ){
+
+            numero.classList.add(
+                "inativo"
+            );
+
+        }
+
+        numero.addEventListener(
+            "click",
+            ()=>comprar(i)
+        );
+
+        grid.appendChild(numero);
+
     }
 
-    celula.addEventListener('click', function() {
-        this.classList.toggle('inativo');
-        salvarEstado(); // Salva sempre que houver um clique
-    });
-
-    grid.appendChild(celula);
 }
+
+
+async function comprar(numero){
+
+    try{
+
+        const resposta =
+        await fetch(
+            `${API}/api/comprar`,
+            {
+                method:"POST",
+
+                headers:{
+                  "Content-Type":
+                  "application/json"
+                },
+
+                body:JSON.stringify({
+                    numero
+                })
+            }
+        );
+
+        if(!resposta.ok){
+
+            const erro =
+            await resposta.json();
+
+            alert(
+                erro.erro
+            );
+
+            return;
+
+        }
+
+        carregarBilhetes();
+
+    }
+
+    catch{
+
+        alert(
+         "Erro na API"
+        );
+
+    }
+
+}
+
+carregarBilhetes();
