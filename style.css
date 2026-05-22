@@ -1,0 +1,37 @@
+/* Layout em 10 colunas usando CSS Grid nativo */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr); 
+    gap: 10px;
+    max-width: 800px;
+    margin: 20px auto;
+}
+
+/* Estilo Ativo: Verde com Efeito 3D */
+.numero {
+    background-color: #28a745; /* Verde */
+    color: white;
+    padding: 15px;
+    text-align: center;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 6px;
+    user-select: none;
+    /* Simulação de efeito 3D */
+    box-shadow: 0 6px #1e7e34, 0 8px 15px rgba(0,0,0,0.2);
+    transition: all 0.1s ease;
+}
+
+/* Feedback visual de clique (pressionar o botão 3D) */
+.numero:active {
+    box-shadow: 0 2px #1e7e34;
+    transform: translateY(4px);
+}
+
+/* Estilo Inativo: Vermelho e sem efeito 3D */
+.inativo {
+    background-color: #dc3545 !important; /* Vermelho */
+    box-shadow: none !important;
+    transform: translateY(4px);
+    cursor: not-allowed;
+}
