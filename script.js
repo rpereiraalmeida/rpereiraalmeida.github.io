@@ -1,5 +1,5 @@
 const API =
-"rodrigopalmeida.pythonanywhere.com/api";
+"rodrigopalmeida.pythonanywhere.com/";
 
 const grid =
 document.getElementById("rifa-grid");
