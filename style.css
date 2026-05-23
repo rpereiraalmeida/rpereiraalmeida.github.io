@@ -62,7 +62,7 @@ body::before {
    FOOTER
 ═══════════════════════════════════════════════ */
 footer {
-  text-align: center;
+  display: flex; align-items: center;
   padding: 3px;
   background-color: black;
   color: white;
