@@ -1,40 +1,484 @@
-/* Alinhando texto principal*/
-h1 {text-align: center;}
-
-/* Layout em 10 colunas usando CSS Grid nativo */
-.grid-container {
-    display: grid;
-    grid-template-columns: repeat(10, 1fr); 
-    gap: 10px;
-    max-width: 800px;
-    margin: 20px auto;
+/* ═══════════════════════════════════════
+   VARIÁVEIS & RESET
+═══════════════════════════════════════ */
+:root {
+    --verde:        #28a745;
+    --verde-dark:   #1e7e34;
+    --vermelho:     #dc3545;
+    --vermelho-dark:#a71d2a;
+    --bg:           #f0f4f8;
+    --painel-bg:    #ffffff;
+    --texto:        #1a1a2e;
+    --cinza-claro:  #e9ecef;
+    --sombra:       0 4px 20px rgba(0,0,0,0.10);
+    --radius:       10px;
 }
 
-/* Estilo Ativo: Verde com Efeito 3D */
-.numero {
-    background-color: #28a745; /* Verde */
-    color: white;
-    padding: 15px;
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--texto);
+    min-height: 100vh;
+}
+
+
+/* ═══════════════════════════════════════
+   HEADER
+═══════════════════════════════════════ */
+header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+    color: #fff;
     text-align: center;
-    font-weight: bold;
+    padding: 1.4rem 1rem 1.2rem;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+}
+
+header h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2rem, 5vw, 3rem);
+    letter-spacing: 3px;
+    line-height: 1;
+}
+
+.subtitulo {
+    font-size: 0.95rem;
+    color: #a0aec0;
+    margin-top: 0.3rem;
+    letter-spacing: 1px;
+}
+
+
+/* ═══════════════════════════════════════
+   LAYOUT (sidebar + main)
+═══════════════════════════════════════ */
+.layout {
+    display: flex;
+    gap: 1.5rem;
+    max-width: 1100px;
+    margin: 1.5rem auto;
+    padding: 0 1rem;
+    align-items: flex-start;
+}
+
+
+/* ═══════════════════════════════════════
+   PAINEL LATERAL
+═══════════════════════════════════════ */
+.painel-lateral {
+    width: 180px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    position: sticky;
+    top: 1rem;
+}
+
+.card-contador {
+    background: var(--painel-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--sombra);
+    padding: 1.1rem 0.8rem;
+    text-align: center;
+    border-top: 4px solid var(--vermelho);
+    transition: transform 0.2s;
+}
+
+.card-contador:hover { transform: translateY(-2px); }
+
+.card-contador.disponivel-card {
+    border-top-color: var(--verde);
+}
+
+.contador-icone {
+    font-size: 1.6rem;
+    margin-bottom: 0.2rem;
+}
+
+.contador-numero {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.6rem;
+    color: var(--texto);
+    line-height: 1;
+    transition: all 0.3s;
+}
+
+.contador-label {
+    font-size: 0.78rem;
+    color: #6c757d;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 0.2rem;
+}
+
+/* Barra de progresso */
+.barra-progresso-wrap {
+    background: var(--painel-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--sombra);
+    padding: 1rem 0.8rem;
+}
+
+.barra-label {
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+}
+
+.barra-fundo {
+    background: var(--cinza-claro);
+    border-radius: 99px;
+    height: 10px;
+    overflow: hidden;
+}
+
+.barra-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--verde), #20c997);
+    border-radius: 99px;
+    width: 0%;
+    transition: width 0.6s cubic-bezier(.4,0,.2,1);
+}
+
+.barra-pct {
+    text-align: right;
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: var(--verde-dark);
+    margin-top: 0.3rem;
+}
+
+/* Legenda */
+.legenda {
+    background: var(--painel-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--sombra);
+    padding: 0.8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.legenda-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #495057;
+}
+
+.legenda-cor {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+.legenda-cor.verde    { background: var(--verde); }
+.legenda-cor.vermelho { background: var(--vermelho); }
+
+
+/* ═══════════════════════════════════════
+   GRID DE NÚMEROS
+═══════════════════════════════════════ */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 8px;
+    flex: 1;
+}
+
+/* Número disponível */
+.numero {
+    background-color: var(--verde);
+    color: white;
+    padding: 12px 6px;
+    text-align: center;
+    font-weight: 800;
+    font-size: 0.85rem;
     cursor: pointer;
     border-radius: 6px;
     user-select: none;
-    /* Simulação de efeito 3D */
-    box-shadow: 0 6px #1e7e34, 0 8px 15px rgba(0,0,0,0.2);
+    box-shadow: 0 5px var(--verde-dark), 0 7px 14px rgba(0,0,0,0.18);
     transition: all 0.1s ease;
+    position: relative;
 }
 
-/* Feedback visual de clique (pressionar o botão 3D) */
-.numero:active {
-    box-shadow: 0 2px #1e7e34;
+.numero:hover:not(.inativo) {
+    background-color: #34ce57;
+    transform: translateY(-2px);
+    box-shadow: 0 7px var(--verde-dark), 0 9px 16px rgba(0,0,0,0.22);
+}
+
+.numero:active:not(.inativo) {
+    box-shadow: 0 2px var(--verde-dark);
     transform: translateY(4px);
 }
 
-/* Estilo Inativo: Vermelho e sem efeito 3D */
+/* Número vendido */
 .inativo {
-    background-color: #dc3545 !important; /* Vermelho */
+    background-color: var(--vermelho) !important;
     box-shadow: none !important;
     transform: translateY(4px);
     cursor: not-allowed;
+    opacity: 0.85;
+}
+
+
+/* ═══════════════════════════════════════
+   TOOLTIP
+═══════════════════════════════════════ */
+.tooltip {
+    position: fixed;
+    z-index: 9999;
+    background: #1a1a2e;
+    color: #fff;
+    padding: 0.45rem 0.75rem;
+    border-radius: 7px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    pointer-events: none;
+    opacity: 0;
+    transform: scale(0.92);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    white-space: nowrap;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.tooltip.visivel {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.tooltip.vendido-tt {
+    border-left: 3px solid var(--vermelho);
+}
+
+.tt-label {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #a0aec0;
+}
+
+.tt-nome {
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: #fff;
+}
+
+.tt-disponivel {
+    color: #6ee78b;
+    font-size: 0.88rem;
+}
+
+
+/* ═══════════════════════════════════════
+   MODAL
+═══════════════════════════════════════ */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 10, 20, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.22s ease;
+}
+
+.modal-overlay.visivel {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.modal {
+    background: #fff;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 380px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+    padding: 2rem 1.8rem 1.8rem;
+    position: relative;
+    transform: translateY(20px) scale(0.96);
+    transition: transform 0.25s cubic-bezier(.34,1.56,.64,1);
+}
+
+.modal-overlay.visivel .modal {
+    transform: translateY(0) scale(1);
+}
+
+.modal-fechar {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: var(--cinza-claro);
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+    transition: background 0.2s, color 0.2s;
+}
+
+.modal-fechar:hover {
+    background: var(--vermelho);
+    color: #fff;
+}
+
+.modal-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.modal-icone {
+    font-size: 2.4rem;
+    margin-bottom: 0.3rem;
+}
+
+.modal-titulo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    letter-spacing: 2px;
+    color: var(--texto);
+}
+
+.modal-numero-info {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-top: 0.2rem;
+}
+
+.modal-numero-info strong {
+    font-size: 1.2rem;
+    color: var(--verde-dark);
+    font-weight: 800;
+}
+
+/* Campos */
+.campo {
+    margin-bottom: 1rem;
+}
+
+.campo label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #495057;
+    margin-bottom: 0.35rem;
+}
+
+.campo input {
+    width: 100%;
+    padding: 0.7rem 0.9rem;
+    border: 2px solid var(--cinza-claro);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-family: 'Nunito', sans-serif;
+    color: var(--texto);
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.campo input:focus {
+    border-color: var(--verde);
+    box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.15);
+}
+
+.modal-erro {
+    font-size: 0.82rem;
+    color: var(--vermelho);
+    font-weight: 700;
+    min-height: 1.1rem;
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+.btn-confirmar {
+    width: 100%;
+    padding: 0.85rem;
+    background: linear-gradient(135deg, var(--verde), #20c997);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 800;
+    font-family: 'Nunito', sans-serif;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 14px rgba(40, 167, 69, 0.35);
+    transition: opacity 0.2s, transform 0.1s;
+}
+
+.btn-confirmar:hover {
+    opacity: 0.93;
+    transform: translateY(-1px);
+}
+
+.btn-confirmar:active {
+    transform: translateY(1px);
+}
+
+.btn-confirmar:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+
+/* ═══════════════════════════════════════
+   RESPONSIVO
+═══════════════════════════════════════ */
+@media (max-width: 750px) {
+    .layout {
+        flex-direction: column;
+    }
+
+    .painel-lateral {
+        width: 100%;
+        flex-direction: row;
+        flex-wrap: wrap;
+        position: static;
+    }
+
+    .card-contador {
+        flex: 1;
+        min-width: 100px;
+    }
+
+    .barra-progresso-wrap,
+    .legenda {
+        flex: 1 1 100%;
+    }
+
+    .grid-container {
+        grid-template-columns: repeat(10, 1fr);
+        gap: 5px;
+    }
+
+    .numero {
+        padding: 10px 4px;
+        font-size: 0.72rem;
+    }
 }
