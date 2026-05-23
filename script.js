@@ -143,7 +143,7 @@ function mostrarIndisponivel(seatEl, numero, info) {
 
     // Toast
     const nome = info.nome ? ` — comprado por ${info.nome}` : "";
-    showToast(`🚫 Assento #${numero} já está vendido${nome}`);
+    showToast(`🚫 Número #${numero} já está vendido${nome}`);
 }
 
 function showToast(msg) {
@@ -201,7 +201,7 @@ function hideTooltip() { tooltip.classList.remove("show"); }
 // ═══════════════════════════════════════════════════════════════════
 function abrirModal(numero, r, c) {
     numeroSelecionado      = numero;
-    modalBadge.textContent = `Fileira ${ROW_LABELS[r]} · Col ${c + 1} · Assento #${numero}`;
+    modalBadge.textContent = `Linha ${ROW_LABELS[r]} · Col ${c + 1} · Número #${numero}`;
     inpNome.value          = "";
     inpTel.value           = "";
     modalErr.textContent   = "";
