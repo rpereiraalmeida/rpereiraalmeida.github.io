@@ -1,3 +1,6 @@
+/* Alinhando texto principal*/
+h1 {text-align: center;}
+
 /* Layout em 10 colunas usando CSS Grid nativo */
 .grid-container {
     display: grid;
