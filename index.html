@@ -2,15 +2,85 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Rifa Online Simplificada</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rifa Online</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header><h1>Rifa Online Simplificada</h1></header>
-    <main>
-        <!-- O grid será gerado dinamicamente pelo JavaScript -->
-        <div id="rifa-grid" class="grid-container"></div>
-    </main>
+
+    <header>
+        <h1>🎟️ Rifa Online</h1>
+        <p class="subtitulo">Escolha seu número da sorte!</p>
+    </header>
+
+    <div class="layout">
+
+        <!-- PAINEL LATERAL -->
+        <aside class="painel-lateral">
+            <div class="card-contador">
+                <div class="contador-icone">🏆</div>
+                <div class="contador-numero" id="vendidos-count">0</div>
+                <div class="contador-label">Vendidos</div>
+            </div>
+            <div class="card-contador disponivel-card">
+                <div class="contador-icone">🎯</div>
+                <div class="contador-numero" id="disponiveis-count">250</div>
+                <div class="contador-label">Disponíveis</div>
+            </div>
+            <div class="barra-progresso-wrap">
+                <div class="barra-label">Progresso</div>
+                <div class="barra-fundo">
+                    <div class="barra-fill" id="barra-fill"></div>
+                </div>
+                <div class="barra-pct" id="barra-pct">0%</div>
+            </div>
+            <div class="legenda">
+                <div class="legenda-item">
+                    <span class="legenda-cor verde"></span> Disponível
+                </div>
+                <div class="legenda-item">
+                    <span class="legenda-cor vermelho"></span> Vendido
+                </div>
+            </div>
+        </aside>
+
+        <!-- GRID DE NÚMEROS -->
+        <main>
+            <div id="rifa-grid" class="grid-container"></div>
+        </main>
+
+    </div>
+
+    <!-- TOOLTIP -->
+    <div class="tooltip" id="tooltip"></div>
+
+    <!-- MODAL DE COMPRA -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal">
+            <button class="modal-fechar" id="modal-fechar">✕</button>
+            <div class="modal-header">
+                <div class="modal-icone">🎟️</div>
+                <h2 class="modal-titulo">Reservar Número</h2>
+                <p class="modal-numero-info">Número: <strong id="modal-numero-display">--</strong></p>
+            </div>
+            <div class="modal-body">
+                <div class="campo">
+                    <label for="input-nome">Nome completo</label>
+                    <input type="text" id="input-nome" placeholder="Seu nome" autocomplete="off" />
+                </div>
+                <div class="campo">
+                    <label for="input-telefone">WhatsApp / Telefone</label>
+                    <input type="tel" id="input-telefone" placeholder="(00) 00000-0000" autocomplete="off" />
+                </div>
+                <p class="modal-erro" id="modal-erro"></p>
+                <button class="btn-confirmar" id="btn-confirmar">Confirmar Compra</button>
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
