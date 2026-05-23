@@ -3,81 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rifa Online</title>
+    <title>Rifa — Mapa de Assentos</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+    <!-- ══ HEADER ══════════════════════════════════════════════════ -->
     <header>
-        <h1>🎟️ Rifa Online</h1>
-        <p class="subtitulo">Escolha seu número da sorte!</p>
+        <span class="header-icon">🎟</span>
+        <div>
+            <h1>Rifa Online</h1>
+            <p class="header-sub">Escolha seu assento da sorte</p>
+        </div>
     </header>
 
-    <div class="layout">
+    <!-- ══ LAYOUT PRINCIPAL ════════════════════════════════════════ -->
+    <div class="page-layout">
 
-        <!-- PAINEL LATERAL -->
-        <aside class="painel-lateral">
-            <div class="card-contador">
-                <div class="contador-icone">🏆</div>
-                <div class="contador-numero" id="vendidos-count">0</div>
-                <div class="contador-label">Vendidos</div>
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+
+            <div class="sidebar-card card-vendidos">
+                <div class="card-icon">🔴</div>
+                <div class="card-val" id="vend-count">0</div>
+                <div class="card-label">Vendidos</div>
             </div>
-            <div class="card-contador disponivel-card">
-                <div class="contador-icone">🎯</div>
-                <div class="contador-numero" id="disponiveis-count">250</div>
-                <div class="contador-label">Disponíveis</div>
+
+            <div class="sidebar-card card-disponiveis">
+                <div class="card-icon">🟢</div>
+                <div class="card-val" id="disp-count">250</div>
+                <div class="card-label">Disponíveis</div>
             </div>
-            <div class="barra-progresso-wrap">
-                <div class="barra-label">Progresso</div>
-                <div class="barra-fundo">
-                    <div class="barra-fill" id="barra-fill"></div>
+
+            <div class="sidebar-card card-progresso">
+                <div class="card-label top">Ocupação</div>
+                <div class="prog-bar-bg">
+                    <div class="prog-bar-fill" id="prog-fill"></div>
                 </div>
-                <div class="barra-pct" id="barra-pct">0%</div>
+                <div class="prog-pct" id="prog-pct">0%</div>
             </div>
-            <div class="legenda">
-                <div class="legenda-item">
-                    <span class="legenda-cor verde"></span> Disponível
+
+            <div class="sidebar-card card-legenda">
+                <div class="card-label top">Legenda</div>
+                <div class="leg-item">
+                    <div class="leg-seat avail"></div>
+                    <span>Disponível</span>
                 </div>
-                <div class="legenda-item">
-                    <span class="legenda-cor vermelho"></span> Vendido
+                <div class="leg-item">
+                    <div class="leg-seat sold"></div>
+                    <span>Vendido</span>
                 </div>
             </div>
+
         </aside>
 
-        <!-- GRID DE NÚMEROS -->
-        <main>
-            <div id="rifa-grid" class="grid-container"></div>
-        </main>
+        <!-- MAPA DE ASSENTOS -->
+        <div class="venue-scroll">
+            <div class="venue-wrapper">
 
+                <!-- Campo / Palco -->
+                <div class="stage-area">
+                    <div class="stage-box">
+                        <span class="stage-text">⚽ CAMPO / PALCO</span>
+                    </div>
+                    <div class="stage-arc"></div>
+                </div>
+
+                <!-- Cabeçalhos de coluna -->
+                <div class="col-headers">
+                    <div class="row-lbl-spacer"></div>
+                    <div class="col-numbers" id="col-numbers"></div>
+                </div>
+
+                <!-- Grid de assentos -->
+                <div class="seating-area" id="seating-area"></div>
+
+            </div>
+        </div>
+
+    </div><!-- /page-layout -->
+
+    <!-- ══ TOAST (assento indisponível) ═══════════════════════════ -->
+    <div class="toast" id="toast" role="alert" aria-live="assertive"></div>
+
+    <!-- ══ TOOLTIP ════════════════════════════════════════════════ -->
+    <div class="tooltip" id="tooltip">
+        <div class="tt-inner"></div>
     </div>
 
-    <!-- TOOLTIP -->
-    <div class="tooltip" id="tooltip"></div>
-
-    <!-- MODAL DE COMPRA -->
-    <div class="modal-overlay" id="modal-overlay">
+    <!-- ══ MODAL DE COMPRA ════════════════════════════════════════ -->
+    <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-label="Reservar assento">
         <div class="modal">
-            <button class="modal-fechar" id="modal-fechar">✕</button>
+
+            <button class="modal-close" id="modal-close" aria-label="Fechar">✕</button>
+
             <div class="modal-header">
-                <div class="modal-icone">🎟️</div>
-                <h2 class="modal-titulo">Reservar Número</h2>
-                <p class="modal-numero-info">Número: <strong id="modal-numero-display">--</strong></p>
+                <div class="modal-badge" id="modal-badge">—</div>
+                <h2 class="modal-title">Reservar Assento</h2>
+                <p class="modal-sub">Preencha seus dados para confirmar</p>
             </div>
+
             <div class="modal-body">
-                <div class="campo">
-                    <label for="input-nome">Nome completo</label>
-                    <input type="text" id="input-nome" placeholder="Seu nome" autocomplete="off" />
+                <div class="field">
+                    <label for="inp-nome">Nome completo</label>
+                    <input type="text" id="inp-nome" placeholder="Seu nome completo" autocomplete="off" />
                 </div>
-                <div class="campo">
-                    <label for="input-telefone">WhatsApp / Telefone</label>
-                    <input type="tel" id="input-telefone" placeholder="(00) 00000-0000" autocomplete="off" />
+                <div class="field">
+                    <label for="inp-tel">WhatsApp / Telefone</label>
+                    <input type="tel" id="inp-tel" placeholder="(00) 00000-0000" autocomplete="off" />
                 </div>
-                <p class="modal-erro" id="modal-erro"></p>
-                <button class="btn-confirmar" id="btn-confirmar">Confirmar Compra</button>
+                <p class="modal-err" id="modal-err"></p>
+                <button class="btn-buy" id="btn-buy">✔ Confirmar Compra</button>
             </div>
+
         </div>
     </div>
 
