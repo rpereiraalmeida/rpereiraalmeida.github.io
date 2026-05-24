@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rifa Online - Números da Sorte</title>
+    <title>Rifa — Números da Sorte</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -39,7 +39,7 @@
             </div>
 
             <div class="sidebar-card card-progresso">
-                <div class="card-label top">Progresso das Vendas</div>
+                <div class="card-label top">Ocupação</div>
                 <div class="prog-bar-bg">
                     <div class="prog-bar-fill" id="prog-fill"></div>
                 </div>
@@ -58,27 +58,25 @@
                 </div>
             </div>
 
+            <!-- CORREÇÃO: removido style="display: none;" — visibilidade controlada pelo JS -->
+            <div class="sidebar-card card-sorteio" id="card-sorteio">
+                <div class="card-label top">Gerador</div>
+                <button class="btn-sortear" id="btn-sortear-sidebar" disabled>🏆 Sortear</button>
+            </div>
+
         </aside>
 
-        <!-- MAPA DE ASSENTOS -->
+        <!-- MAPA DE NÚMEROS -->
         <div class="venue-scroll">
             <div class="venue-wrapper">
-
-                <!-- Campo / Palco -->
-                <div class="stage-area">
-                    <div class="stage-box">
-                        <span class="stage-text">⚽ Números da Sorte</span>
-                    </div>
-                    <div class="stage-arc"></div>
-                </div>
-
+                <h2>Números da Sorte</h2>
                 <!-- Cabeçalhos de coluna -->
                 <div class="col-headers">
                     <div class="row-lbl-spacer"></div>
                     <div class="col-numbers" id="col-numbers"></div>
                 </div>
 
-                <!-- Grid de assentos -->
+                <!-- Grid de números -->
                 <div class="seating-area" id="seating-area"></div>
 
             </div>
@@ -86,7 +84,7 @@
 
     </div><!-- /page-layout -->
 
-    <!-- ══ TOAST (assento indisponível) ═══════════════════════════ -->
+    <!-- ══ TOAST ══════════════════════════════════════════════════ -->
     <div class="toast" id="toast" role="alert" aria-live="assertive"></div>
 
     <!-- ══ TOOLTIP ════════════════════════════════════════════════ -->
@@ -95,7 +93,7 @@
     </div>
 
     <!-- ══ MODAL DE COMPRA ════════════════════════════════════════ -->
-    <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-label="Reservar assento">
+    <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-label="Reservar número">
         <div class="modal">
 
             <button class="modal-close" id="modal-close" aria-label="Fechar">✕</button>
@@ -120,14 +118,42 @@
             </div>
 
         </div>
- 
+    </div>
+
+    <!-- ══ MODAL SORTEIO (rifa esgotada) ═════════════════════════ -->
+    <div class="modal-overlay" id="modal-sorteio" role="dialog">
+        <div class="modal text-center">
+            <h2 class="modal-title">Rifa Esgotada! 🎉</h2>
+            <p class="modal-sub" style="margin-bottom: 1.5rem;">
+                Todos os números foram vendidos. Deseja realizar o sorteio do vencedor agora?
+            </p>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button class="btn-buy" id="btn-sim-sorteio"
+                    style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                    Sim, Sortear!
+                </button>
+                <button class="btn-buy" id="btn-nao-sorteio"
+                    style="background: #4a5578; box-shadow: none;">
+                    Agora não
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ TELA DO VENCEDOR ═══════════════════════════════════════ -->
+    <div class="winner-overlay" id="winner-overlay">
+        <div class="winner-content">
+            <h2 class="winner-title">O Número Vencedor é...</h2>
+            <div class="winner-number" id="winner-number">--</div>
+            <p class="winner-name" id="winner-name"></p>
+            <button class="modal-close winner-close" id="winner-close" aria-label="Fechar">✕</button>
+        </div>
     </div>
 
     <script src="script.js"></script>
 
-
+    <footer id="page-footer">
+        <p>&copy; 2026 Todos os direitos reservados.</p>
+    </footer>
 </body>
-<footer>
-    <p>&copy; Copyright 2026 - Todos os direitos reservados.</p>
-</footer>
 </html>
