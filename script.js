@@ -1,10 +1,11 @@
-const API   = "https://rodrigopalmeida.pythonanywhere.com";
-const TOTAL = 250;
-const COLS  = 10;
-const ROWS  = 25;
-const ROW_LABELS = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25"];
+// ─── CONFIGURAÇÃO ──────────────────────────────────────────────────────────
+const API        = "https://rodrigopalmeida.pythonanywhere.com";
+const TOTAL      = 250;
+const COLS       = 10;
+const ROWS       = 25;
+const ROW_LABELS  = Array.from({ length: 25 }, (_, i) => String(i + 1));
 
-// ─── REFS ──────────────────────────────────────────────────────────
+// ─── REFS ──────────────────────────────────────────────────────────────────
 const seatingArea  = document.getElementById("seating-area");
 const colNumbers   = document.getElementById("col-numbers");
 const tooltip      = document.getElementById("tooltip");
@@ -22,17 +23,28 @@ const vendCount    = document.getElementById("vend-count");
 const progFill     = document.getElementById("prog-fill");
 const progPct      = document.getElementById("prog-pct");
 
+const cardSorteio   = document.getElementById("card-sorteio");
+const btnSorteioSb  = document.getElementById("btn-sortear-sidebar");
+const btnSorteioLbl = document.getElementById("btn-sortear-label");
+const modalSorteio  = document.getElementById("modal-sorteio");
+const btnSimSorteio = document.getElementById("btn-sim-sorteio");
+const btnNaoSorteio = document.getElementById("btn-nao-sorteio");
+const winnerOverlay = document.getElementById("winner-overlay");
+const winnerNumber  = document.getElementById("winner-number");
+const winnerName    = document.getElementById("winner-name");
+const winnerClose   = document.getElementById("winner-close");
+
 let dadosStatus       = {};
 let numeroSelecionado = null;
 let toastTimer        = null;
+let sorteioOferecido  = false;
 
-
-// ═══════════════════════════════════════════════════════════════════
-// CARREGAR
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
+// INICIALIZAÇÃO — busca dados da API
+// ═══════════════════════════════════════════════════════════════════════════
 async function carregarBilhetes() {
     try {
-        const res  = await fetch(`${API}/api/status`);
+        const res   = await fetch(`${API}/api/status`);
         dadosStatus = await res.json();
         buildColHeaders();
         montarAssentos(dadosStatus);
@@ -45,10 +57,9 @@ async function carregarBilhetes() {
     }
 }
 
-
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
 // CABEÇALHOS DE COLUNA
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
 function buildColHeaders() {
     colNumbers.innerHTML = "";
     colNumbers.style.gridTemplateColumns = `repeat(${COLS}, var(--seat))`;
@@ -60,10 +71,9 @@ function buildColHeaders() {
     }
 }
 
-
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
 // MONTAR ASSENTOS
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
 function montarAssentos(status) {
     seatingArea.innerHTML = "";
 
@@ -82,22 +92,18 @@ function montarAssentos(status) {
             const vendido = info.status === "vendido";
 
             const seat = document.createElement("div");
-            seat.className = "seat" + (vendido ? " sold" : "");
+            seat.className   = "seat" + (vendido ? " sold" : "");
             seat.textContent = numero;
             seat.dataset.numero = numero;
             seat.style.animationDelay = `${(r * COLS + c) * 3}ms`;
 
-            // Tooltip
             seat.addEventListener("mouseenter", e => showTooltip(e, numero, info, r, c));
             seat.addEventListener("mousemove",  moveTooltip);
             seat.addEventListener("mouseleave", hideTooltip);
 
-            // Clique
             if (vendido) {
-                // Assento vendido → toast + shake
                 seat.addEventListener("click", () => mostrarIndisponivel(seat, numero, info));
             } else {
-                // Disponível → abre modal
                 seat.addEventListener("click", () => abrirModal(numero, r, c));
             }
 
@@ -112,10 +118,9 @@ function getInfo(num, status) {
     return status[num] || status[String(num)] || { status: "disponivel", nome: "", telefone: "" };
 }
 
-
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
 // STATS / CONTADORES
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
 function atualizarStats(status) {
     let vendidos = 0;
     for (const k in status) {
@@ -128,20 +133,43 @@ function atualizarStats(status) {
     vendCount.textContent = vendidos;
     progFill.style.width  = pct + "%";
     progPct.textContent   = pct + "%";
+
+    // ── Botão de sorteio: sempre visível na sidebar ──────────────────────
+    // Mostra o estado atual no rótulo do botão
+    if (vendidos === 0) {
+        // Nenhum número vendido — botão desabilitado
+        btnSorteioSb.disabled = true;
+        btnSorteioSb.textContent = "🏆 Sortear";
+        cardSorteio.classList.remove("sorteio-pronto");
+    } else if (vendidos === TOTAL) {
+        // Rifa esgotada — destaque especial
+        btnSorteioSb.disabled = false;
+        btnSorteioSb.textContent = "🏆 Sortear Vencedor";
+        cardSorteio.classList.add("sorteio-pronto");
+
+        if (!sorteioOferecido) {
+            setTimeout(() => {
+                modalSorteio.classList.add("open");
+                sorteioOferecido = true;
+            }, 800);
+        }
+    } else {
+        // Parcialmente vendida — permite sortear entre os vendidos
+        btnSorteioSb.disabled = false;
+        btnSorteioSb.textContent = `🏆 Sortear (${vendidos})`;
+        cardSorteio.classList.remove("sorteio-pronto");
+    }
 }
 
-
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
 // TOAST — ASSENTO INDISPONÍVEL
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
 function mostrarIndisponivel(seatEl, numero, info) {
-    // Efeito de shake no assento
     seatEl.classList.remove("shake");
-    void seatEl.offsetWidth; // reflow para reiniciar animação
+    void seatEl.offsetWidth;
     seatEl.classList.add("shake");
     seatEl.addEventListener("animationend", () => seatEl.classList.remove("shake"), { once: true });
 
-    // Toast
     const nome = info.nome ? ` — comprado por ${info.nome}` : "";
     showToast(`🚫 Número #${numero} já está vendido${nome}`);
 }
@@ -153,18 +181,17 @@ function showToast(msg) {
     toastTimer = setTimeout(() => toast.classList.remove("show"), 3200);
 }
 
-
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
 // TOOLTIP
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
 function showTooltip(e, numero, info, r, c) {
     const vendido = info.status === "vendido";
     const col     = c + 1;
     const row     = ROW_LABELS[r];
 
     let html = `
-        <div class="tt-row">Fileira ${row} · Col ${col}</div>
-        <div class="tt-number">Assento #${numero}</div>
+        <div class="tt-row">Linha ${row} · Col ${col}</div>
+        <div class="tt-number">Número #${numero}</div>
         <div class="tt-div"></div>
     `;
     if (vendido) {
@@ -195,10 +222,9 @@ function positionTooltip(e) {
 
 function hideTooltip() { tooltip.classList.remove("show"); }
 
-
-// ═══════════════════════════════════════════════════════════════════
-// MODAL
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
+// MODAL DE COMPRA
+// ═══════════════════════════════════════════════════════════════════════════
 function abrirModal(numero, r, c) {
     numeroSelecionado      = numero;
     modalBadge.textContent = `Linha ${ROW_LABELS[r]} · Col ${c + 1} · Número #${numero}`;
@@ -220,7 +246,7 @@ document.addEventListener("keydown", e => { if (e.key === "Escape") fecharModal(
 
 // Máscara de telefone
 inpTel.addEventListener("input", () => {
-    let v = inpTel.value.replace(/\D/g,"").slice(0,11);
+    let v = inpTel.value.replace(/\D/g, "").slice(0, 11);
     if      (v.length > 6) v = `(${v.slice(0,2)}) ${v.slice(2,7)}-${v.slice(7)}`;
     else if (v.length > 2) v = `(${v.slice(0,2)}) ${v.slice(2)}`;
     else if (v.length > 0) v = `(${v}`;
@@ -230,10 +256,9 @@ inpTel.addEventListener("input", () => {
 inpNome.addEventListener("keydown", e => { if (e.key === "Enter") inpTel.focus(); });
 inpTel.addEventListener("keydown",  e => { if (e.key === "Enter") btnBuy.click(); });
 
-
-// ═══════════════════════════════════════════════════════════════════
-// CONFIRMAR COMPRA
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
+// CONFIRMAR COMPRA — POST para a API
+// ═══════════════════════════════════════════════════════════════════════════
 btnBuy.addEventListener("click", async () => {
     const nome     = inpNome.value.trim();
     const telefone = inpTel.value.trim();
@@ -242,13 +267,13 @@ btnBuy.addEventListener("click", async () => {
         modalErr.textContent = "Informe seu nome completo.";
         inpNome.focus(); return;
     }
-    if (!telefone || telefone.replace(/\D/g,"").length < 10) {
+    if (!telefone || telefone.replace(/\D/g, "").length < 10) {
         modalErr.textContent = "Informe um telefone válido.";
         inpTel.focus(); return;
     }
 
-    btnBuy.disabled    = true;
-    btnBuy.textContent = "Aguarde...";
+    btnBuy.disabled      = true;
+    btnBuy.textContent   = "Aguarde...";
     modalErr.textContent = "";
 
     try {
@@ -275,8 +300,81 @@ btnBuy.addEventListener("click", async () => {
     }
 });
 
+// ═══════════════════════════════════════════════════════════════════════════
+// LÓGICA DO SORTEIO
+// ═══════════════════════════════════════════════════════════════════════════
+btnNaoSorteio.addEventListener("click", () => {
+    modalSorteio.classList.remove("open");
+});
 
-// ═══════════════════════════════════════════════════════════════════
+btnSimSorteio.addEventListener("click", () => {
+    modalSorteio.classList.remove("open");
+    iniciarSorteioAnimado();
+});
+
+// CORREÇÃO PRINCIPAL: listener direto no botão da sidebar
+btnSorteioSb.addEventListener("click", () => {
+    if (!btnSorteioSb.disabled) {
+        iniciarSorteioAnimado();
+    }
+});
+
+winnerClose.addEventListener("click", () => {
+    winnerOverlay.classList.remove("open");
+});
+
+// Animação de números girando antes de mostrar o vencedor
+function iniciarSorteioAnimado() {
+    // Coleta apenas os números vendidos para sortear entre eles
+    const vendidos = Object.keys(dadosStatus).filter(
+        k => dadosStatus[k].status === "vendido"
+    );
+
+    if (vendidos.length === 0) {
+        showToast("⚠ Nenhum número vendido para sortear!");
+        return;
+    }
+
+    winnerOverlay.classList.add("open");
+    winnerNumber.textContent = "??";
+    winnerName.textContent   = "Sorteando...";
+
+    let counter = 0;
+    const tempoAnimacao = setInterval(() => {
+        // Número aleatório visual (pode ser qualquer um do range)
+        winnerNumber.textContent = Math.floor(Math.random() * TOTAL) + 1;
+        counter++;
+
+        if (counter > 30) {
+            clearInterval(tempoAnimacao);
+            finalizarSorteio(vendidos);
+        }
+    }, 50);
+}
+
+// Sorteia entre os números efetivamente vendidos
+function finalizarSorteio(vendidos) {
+    // Se não receber a lista, recalcula
+    if (!vendidos) {
+        vendidos = Object.keys(dadosStatus).filter(
+            k => dadosStatus[k].status === "vendido"
+        );
+    }
+
+    const idxAleatorio = Math.floor(Math.random() * vendidos.length);
+    const sorteado     = Number(vendidos[idxAleatorio]);
+
+    winnerNumber.textContent = sorteado;
+
+    const info = getInfo(sorteado, dadosStatus);
+    if (info.status === "vendido" && info.nome) {
+        winnerName.textContent = `🎉 Parabéns, ${info.nome}! 🎉`;
+    } else {
+        winnerName.textContent = `Número #${sorteado} sorteado!`;
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // INIT
-// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
 carregarBilhetes();
